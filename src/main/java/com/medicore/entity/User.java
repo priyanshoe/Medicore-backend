@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.medicore.ENUM.UserRole;
+import com.medicore.dto.UserRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,8 +16,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "users")
@@ -37,4 +42,14 @@ public class User {
 	private Timestamp createdAt;
 	@UpdateTimestamp
 	private Timestamp updatedAt;
+	
+	
+	// convert User request Dto -> user
+	public User(UserRequestDto user) {
+		this.name = user.getName();
+		this.email = user.getEmail();
+		// save hash password in AuthService
+		this.role = user.getRole();
+	}
+	
 }
