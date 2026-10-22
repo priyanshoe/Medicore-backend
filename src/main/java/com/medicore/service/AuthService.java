@@ -1,12 +1,15 @@
 package com.medicore.service;
 
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.medicore.ENUM.UserRole;
 import com.medicore.entity.User;
+import com.medicore.exception.BadCredentialsException;
+import com.medicore.exception.ConflictException;
+import com.medicore.exception.UnAuthorizeException;
 import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,9 +23,11 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	
 	public String register(User newUser) {
-		
+		if(newUser.getRole().equals(UserRole.ADMIN)) {
+			throw new UnAuthorizeException();
+		}
 		if(userRepo.existsByEmail(newUser.getEmail())) {
-			return "user already exist";
+			throw new ConflictException("user");
 		}
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 		userRepo.save(newUser);
@@ -33,11 +38,11 @@ public class AuthService {
 	public String login(User reqUser) {		
 		try {
 			if(!userRepo.existsByEmail(reqUser.getEmail())) {
-				throw new BadCredentialsException("Bad Credentials");
+				throw new BadCredentialsException();
 			}
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(reqUser.getEmail(), reqUser.getPassword()));			
 		}catch (Exception e) {
-			return "Bad Credentials";
+			throw new BadCredentialsException();
 		}
 				
 		return "user loggedIn";

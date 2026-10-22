@@ -19,7 +19,11 @@ public class SecutiryConfig {
 		http
 		.csrf(csrf -> csrf.disable())
 		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-		.httpBasic(httpBasic -> Customizer.withDefaults());
+		.httpBasic(httpBasic -> Customizer.withDefaults())
+		.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/auth/**","/","/health").permitAll()
+				.anyRequest().authenticated()
+				);
 		
 		return http.build();
 	}

@@ -4,8 +4,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.medicore.exception.BadCredentialsException;
+import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class CustomUserDetails implements UserDetailsService {
 
-	private final PasswordEncoder passwordEncoder;
+	private final UserRepository userRepo;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return User.withUsername("test")
-				.password(passwordEncoder.encode("testpass"))
+		com.medicore.entity.User user =  userRepo.findByEmail(username).orElseThrow(()-> new BadCredentialsException());
+		return User.withUsername(user.getEmail())
+				.password(user.getPassword())
+				.roles(user.getRole().toString())
 				.build();
 	}
 
