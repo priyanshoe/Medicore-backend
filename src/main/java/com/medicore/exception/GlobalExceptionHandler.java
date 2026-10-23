@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
 				.body(new ApiResponseDto(false,ex.getMessage(),null));
 	}
 	
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ApiResponseDto> handleBadRequestException(BadRequestException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(new ApiResponseDto(false, ex.getMessage(), null));
+	}
+	
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<ApiResponseDto> handleBadCredentialsException(BadCredentialsException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)

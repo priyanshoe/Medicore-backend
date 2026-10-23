@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.medicore.ENUM.UserRole;
 import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.AuthResponseDto;
+import com.medicore.dto.DoctorProfileRequestDto;
 import com.medicore.dto.UserRequestDto;
 import com.medicore.dto.UserResponseDto;
 import com.medicore.entity.User;
@@ -26,11 +27,12 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 	
 	private final UserRepository userRepo;
+	private final DoctorProfileService doctorProfileService;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	
 	
-	public ResponseEntity<ApiResponseDto> register(UserRequestDto newUser) {
+	public ResponseEntity<ApiResponseDto> register(UserRequestDto newUser, DoctorProfileRequestDto newDoctorProfile) {
 		if(newUser.getRole().equals(UserRole.ADMIN)) {
 			throw new UnAuthorizeException();
 		}
@@ -40,6 +42,11 @@ public class AuthService {
 		User user = new User(newUser);
 		user.setPassword(passwordEncoder.encode(newUser.getPassword()));
 		User savedUser = userRepo.save(user);
+		// save profile
+		if(savedUser.getRole().equals(UserRole.DOCTOR)) {
+			doctorProfileService.registerProfile(savedUser, newDoctorProfile);
+		}
+		
 		UserResponseDto userRes = new UserResponseDto(savedUser);
 		AuthResponseDto responseDto = new AuthResponseDto(userRes,"dummy token");
 		
