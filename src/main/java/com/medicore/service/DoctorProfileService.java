@@ -39,7 +39,8 @@ public class DoctorProfileService {
 				.body(new ApiResponseDto(true,"doctor profiles fetched", responseDtos));
 	}
 	
-	public ResponseEntity<ApiResponseDto> registerProfile(User user, DoctorProfileRequestDto profile){
+	// only for backEnd
+	public DoctorProfileResponseDto registerProfile(User user, DoctorProfileRequestDto profile){
 		if(profile.equals(null)) {
 			throw new BadRequestException("no profile data");
 		}
@@ -50,10 +51,8 @@ public class DoctorProfileService {
 		newProfile.setUser(user);
 		DoctorProfile savedProfile = profileRepo.save(newProfile);
 		DoctorProfileResponseDto response = new DoctorProfileResponseDto(savedProfile);
-		
-		
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponseDto(true,"doctor profile created", response));
+
+		return response;
 	}
 
 }
