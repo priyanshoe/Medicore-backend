@@ -1,4 +1,5 @@
 api prefix = "/api"
 
 PENDING
-patient registeration; 
+patient registeration testing;
+login response dto; 
