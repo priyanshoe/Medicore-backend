@@ -17,7 +17,6 @@ import com.medicore.dto.DoctorProfileRequestDto;
 import com.medicore.dto.DoctorProfileResponseDto;
 import com.medicore.dto.UserRequestDto;
 import com.medicore.dto.UserResponseDto;
-import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadCredentialsException;
 import com.medicore.exception.BadRequestException;
@@ -51,7 +50,6 @@ public class AuthService {
 		}
 		User user = new User(newUser);
 		user.setPassword(passwordEncoder.encode(newUser.getPassword()));
-//		DoctorProfile profile = new DoctorProfile(newDoctorProfile);
 		User savedUser = userRepo.save(user);
 		// save profile
 		DoctorProfileResponseDto profileRes = doctorProfileService.registerProfile(savedUser, newDoctorProfile);
@@ -60,7 +58,7 @@ public class AuthService {
 		AuthResponseDto responseDto = new AuthResponseDto(userRes, profileRes,"dummy token");
 		
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponseDto(true,"user registered", responseDto));
+				.body(new ApiResponseDto(true,"doctor registered", responseDto));
 	}
 	
 	

@@ -22,7 +22,7 @@ public class AuthController {
 	
 	@PostMapping("/sign-up/doctor")
 	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody DoctorSignUpRequestDto signUpRequestDto) {
-		return authService.register(signUpRequestDto.getUser(), signUpRequestDto.getPofile());
+		return authService.register(signUpRequestDto.getUser(), signUpRequestDto.getProfile());
 	}
 	
 

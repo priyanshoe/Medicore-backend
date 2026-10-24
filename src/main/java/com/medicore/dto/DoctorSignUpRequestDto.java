@@ -6,5 +6,5 @@ import lombok.Data;
 public class DoctorSignUpRequestDto {
 
 	private UserRequestDto user;
-	private DoctorProfileRequestDto pofile;
+	private DoctorProfileRequestDto profile;
 }
