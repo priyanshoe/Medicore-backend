@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.medicore.dto.ApiResponseDto;
+import com.medicore.dto.DoctorSignUpRequestDto;
+import com.medicore.dto.PatientSignUpRequestDto;
 import com.medicore.dto.UserRequestDto;
 import com.medicore.service.AuthService;
 
@@ -19,9 +21,14 @@ public class AuthController {
 
 	private final AuthService authService;
 	
-	@PostMapping("/sign-up")
-	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody UserRequestDto newUser) {
-		return authService.register(newUser);
+	@PostMapping("/sign-up/doctor")
+	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody DoctorSignUpRequestDto signUpRequestDto) {
+		return authService.register(signUpRequestDto.getUser(), signUpRequestDto.getProfile());
+	}
+	
+	@PostMapping("/sign-up/patient")
+	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody PatientSignUpRequestDto signUpRequestDto) {
+		return authService.register(signUpRequestDto.getUser(), signUpRequestDto.getProfile());
 	}
 	
 
