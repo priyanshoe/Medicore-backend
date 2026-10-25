@@ -2,7 +2,7 @@ package com.medicore.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +53,16 @@ public class DoctorProfileService {
 		DoctorProfileResponseDto response = new DoctorProfileResponseDto(savedProfile);
 
 		return response;
+	}
+	
+
+	// only for backEnd
+	public DoctorProfileResponseDto getUserProfile(User user) {
+		Optional<DoctorProfile> profile = profileRepo.findByUser(user);
+		if(profile.isEmpty()) {
+			return null;
+		}
+		return new DoctorProfileResponseDto(profile.get());
 	}
 
 }

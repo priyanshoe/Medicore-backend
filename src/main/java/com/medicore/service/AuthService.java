@@ -105,6 +105,15 @@ public class AuthService {
 			UserResponseDto userRes = new UserResponseDto(existingUser);
 			// fix profile response
 			AuthResponseDto responseDto = new AuthResponseDto(userRes,null,null,"demo token");
+			//fetch user profile
+			if(existingUser.getRole().equals(UserRole.DOCTOR)) {
+				DoctorProfileResponseDto profileDto = doctorProfileService.getUserProfile(existingUser);
+				responseDto.setDoctorProfile(profileDto);
+			}
+			if(existingUser.getRole().equals(UserRole.PATIENT)) {
+				PatientProfileResponseDto profileDto = patientProfileService.getUserProfile(existingUser);
+				responseDto.setPatientProfile(profileDto);
+			}
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.body(new ApiResponseDto(true, "user loggedIn" ,responseDto));
 		}catch (AuthenticationException e) {

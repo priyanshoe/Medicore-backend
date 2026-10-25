@@ -1,12 +1,11 @@
 package com.medicore.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
-import com.medicore.dto.DoctorProfileRequestDto;
-import com.medicore.dto.DoctorProfileResponseDto;
 import com.medicore.dto.PatientProfileRequestDto;
 import com.medicore.dto.PatientProfileResponseDto;
-import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.PatientProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
@@ -35,6 +34,15 @@ public class PatientProfileService {
 		PatientProfileResponseDto response = new PatientProfileResponseDto(savedProfile);
 		
 		return response;
+	}
+	
+	// only for backEnd
+	public PatientProfileResponseDto getUserProfile(User user) {
+		Optional<PatientProfile> profile = profileRepo.findByUser(user);
+		if(profile.isEmpty()) {
+			return null;
+		}
+		return new PatientProfileResponseDto(profile.get());
 	}
 	
 }
