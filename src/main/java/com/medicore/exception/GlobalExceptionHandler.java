@@ -1,6 +1,7 @@
 package com.medicore.exception;
 
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,4 +56,19 @@ public class GlobalExceptionHandler {
 				.body(new ApiResponseDto(false, ex.getMessage(), null));
 	}
 	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ApiResponseDto> handleNotFoundException(NotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ApiResponseDto(false, ex.getMessage(), null));
+	}
+	
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ApiResponseDto> handleDataIntegrityViolationExceptionException(DataIntegrityViolationException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(new ApiResponseDto(false, "appointment already exists", null));
+	}
+	
 }
+
+

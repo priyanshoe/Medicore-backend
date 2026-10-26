@@ -7,10 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.medicore.ENUM.AppointmentStatus;
+import com.medicore.ENUM.UserRole;
 import com.medicore.dto.ApiResponseDto;
+import com.medicore.dto.AppointmentRequestDto;
 import com.medicore.entity.Appointment;
 import com.medicore.entity.User;
+import com.medicore.exception.BadRequestException;
+import com.medicore.exception.NotFoundException;
 import com.medicore.repository.AppointmentRepository;
+import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +26,7 @@ public class AppointmentService {
 
 	private final AppointmentRepository appointmentRepo;
 	private final AuthService authService;
+	private final UserRepository userRepo;
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
@@ -44,5 +51,29 @@ public class AppointmentService {
 		List<Appointment> appointments = appointmentRepo.findAllByPatient(authUser);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"patient's appointments fetched", appointments));
+	}
+	
+
+	@PreAuthorize("hasRole('PATIENT')")
+	public ResponseEntity<ApiResponseDto> create(AppointmentRequestDto newAppointment){
+		User patient = authService.getLoginUser();
+		User doctor = userRepo.findById(newAppointment.getDoctorId())
+				.orElseThrow(()-> new NotFoundException("doctor"));
+		if(!doctor.getRole().equals(UserRole.DOCTOR)) {
+			throw new BadRequestException("invalid doctor id");
+		}
+		
+		Appointment appointment = new Appointment();
+		appointment.setPatient(patient);
+		appointment.setDoctor(doctor);
+		appointment.setDate(newAppointment.getDate());
+		appointment.setTime(newAppointment.getTime());
+		appointment.setReason(newAppointment.getReason());
+		appointment.setStatus(AppointmentStatus.PENDING);
+		
+		Appointment savedAppointment = appointmentRepo.save(appointment);
+		
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(new ApiResponseDto(true,"appointment created", savedAppointment));
 	}
 }

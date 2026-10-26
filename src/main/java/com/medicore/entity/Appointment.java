@@ -3,7 +3,7 @@ package com.medicore.entity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.medicore.ENUM.AppointmentStatus;
@@ -18,6 +18,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +28,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
+@Table(uniqueConstraints = {
+	        @UniqueConstraint(
+	            name = "uk_doctor_patient_date_time",
+	            columnNames = {
+	                "doctor_id",
+	                "patient_id",
+	                "date",
+	                "time"
+	            })})
 public class Appointment {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -54,7 +66,7 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
-    @CreatedDate
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 }
