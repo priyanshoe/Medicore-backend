@@ -21,4 +21,15 @@ public class AppointmentController {
 	public ResponseEntity<ApiResponseDto> allAppointments(){
 		return appointmentService.getAll();
 	}
+
+	@GetMapping("/doctor")
+	public ResponseEntity<ApiResponseDto> allDoctorAppointments(){
+		return appointmentService.getByDoctor();
+	}
+
+
+	@GetMapping("/patient")
+	public ResponseEntity<ApiResponseDto> allPatientAppointments(){
+		return appointmentService.getByPatient();
+	}
 }

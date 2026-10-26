@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,6 +124,14 @@ public class AuthService {
 			throw new RuntimeException(e.getMessage());
 		}
 				
+	}
+	
+	// only for backend
+	public User getLoginUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final String email = authentication.getName(); 
+		return userRepo.findByEmail(email)
+				.orElseThrow(() -> new UnAuthorizeException("user not logged in"));
 	}
 
 }

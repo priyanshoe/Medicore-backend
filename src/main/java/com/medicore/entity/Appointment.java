@@ -1,10 +1,8 @@
 package com.medicore.entity;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
