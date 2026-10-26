@@ -24,7 +24,6 @@ import com.medicore.exception.BadCredentialsException;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.ConflictException;
 import com.medicore.exception.UnAuthorizeException;
-import com.medicore.repository.PatientProfileRepository;
 import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +37,7 @@ public class AuthService {
 	private final PatientProfileService patientProfileService;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
+	private final JwtService jwtService;
 	
 	
 	// registration for doctor
@@ -59,7 +59,7 @@ public class AuthService {
 		DoctorProfileResponseDto profileRes = doctorProfileService.registerProfile(savedUser, newDoctorProfile);
 		// convert to Dto
 		UserResponseDto userRes = new UserResponseDto(savedUser);
-		AuthResponseDto responseDto = new AuthResponseDto(userRes, profileRes,"dummy token");
+		AuthResponseDto responseDto = new AuthResponseDto(userRes, profileRes, jwtService.genrateToken(savedUser));
 		
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ApiResponseDto(true,"doctor registered", responseDto));
@@ -87,7 +87,7 @@ public class AuthService {
 		PatientProfileResponseDto profileRes = patientProfileService.registerProfile(savedUser, newPatientProfile);
 		// convert to Dto
 		UserResponseDto userRes = new UserResponseDto(savedUser);
-		AuthResponseDto responseDto = new AuthResponseDto(userRes, profileRes,"dummy token");
+		AuthResponseDto responseDto = new AuthResponseDto(userRes, profileRes,jwtService.genrateToken(savedUser));
 		
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ApiResponseDto(true,"patient registered", responseDto));
@@ -104,7 +104,7 @@ public class AuthService {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(reqUser.getEmail(), reqUser.getPassword()));
 			UserResponseDto userRes = new UserResponseDto(existingUser);
 			// fix profile response
-			AuthResponseDto responseDto = new AuthResponseDto(userRes,null,null,"demo token");
+			AuthResponseDto responseDto = new AuthResponseDto(userRes,null,null, jwtService.genrateToken(existingUser));
 			//fetch user profile
 			if(existingUser.getRole().equals(UserRole.DOCTOR)) {
 				DoctorProfileResponseDto profileDto = doctorProfileService.getUserProfile(existingUser);
