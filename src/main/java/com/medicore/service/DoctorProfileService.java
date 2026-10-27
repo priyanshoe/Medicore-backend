@@ -15,6 +15,7 @@ import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.ConflictException;
+import com.medicore.exception.NotFoundException;
 import com.medicore.repository.DoctorProfileRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class DoctorProfileService {
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"doctor profiles fetched", responseDtos));
 	}
-	
+		
 	// only for backEnd
 	public DoctorProfileResponseDto registerProfile(User user, DoctorProfileRequestDto profile){
 		if(profile.equals(null)) {
@@ -60,7 +61,7 @@ public class DoctorProfileService {
 	public DoctorProfileResponseDto getUserProfile(User user) {
 		Optional<DoctorProfile> profile = profileRepo.findByUser(user);
 		if(profile.isEmpty()) {
-			return null;
+			throw new NotFoundException("doctor profile not found");
 		}
 		return new DoctorProfileResponseDto(profile.get());
 	}

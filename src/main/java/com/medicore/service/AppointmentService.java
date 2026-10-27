@@ -1,5 +1,6 @@
 package com.medicore.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,10 @@ import com.medicore.ENUM.AppointmentStatus;
 import com.medicore.ENUM.UserRole;
 import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.AppointmentRequestDto;
+import com.medicore.dto.AppointmentResponseDto;
+import com.medicore.dto.DoctorProfileResponseDto;
 import com.medicore.entity.Appointment;
+import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.NotFoundException;
@@ -27,6 +31,7 @@ public class AppointmentService {
 	private final AppointmentRepository appointmentRepo;
 	private final AuthService authService;
 	private final UserRepository userRepo;
+	private final DoctorProfileService doctorProfileService;
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
@@ -49,8 +54,14 @@ public class AppointmentService {
 	public ResponseEntity<ApiResponseDto> getByPatient(){
 		User authUser = authService.getLoginUser();
 		List<Appointment> appointments = appointmentRepo.findAllByPatient(authUser);
+		List<AppointmentResponseDto> responseDto = new ArrayList<AppointmentResponseDto>();
+		for(Appointment appointment:appointments) {
+			DoctorProfileResponseDto doctorProfile = doctorProfileService.getUserProfile(appointment.getDoctor());
+			AppointmentResponseDto response = new AppointmentResponseDto(appointment, doctorProfile);
+			responseDto.add(response);
+		}
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponseDto(true,"patient's appointments fetched", appointments));
+				.body(new ApiResponseDto(true,"patient's appointments fetched", responseDto));
 	}
 	
 
