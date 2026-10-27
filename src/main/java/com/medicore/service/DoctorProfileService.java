@@ -49,6 +49,7 @@ public class DoctorProfileService {
 			throw new ConflictException("doctor profile already exist");
 		}
 		DoctorProfile newProfile =  new DoctorProfile(profile);
+		newProfile.setName(user.getName());
 		newProfile.setUser(user);
 		DoctorProfile savedProfile = profileRepo.save(newProfile);
 		DoctorProfileResponseDto response = new DoctorProfileResponseDto(savedProfile);

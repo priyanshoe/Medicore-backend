@@ -39,7 +39,6 @@ public class DoctorProfile {
 	private String availability;
 	
 	public DoctorProfile(DoctorProfileRequestDto profile) {
-		this.name = profile.getName();
 		this.phone = profile.getPhone();
 		this.specialization = profile.getSpecialization();
 		this.qualification = profile.getQualification();

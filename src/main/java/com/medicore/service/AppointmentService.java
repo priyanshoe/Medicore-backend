@@ -19,11 +19,13 @@ import com.medicore.dto.AppointmentResponseDto;
 import com.medicore.dto.DoctorProfileResponseDto;
 import com.medicore.entity.Appointment;
 import com.medicore.entity.DoctorProfile;
+import com.medicore.entity.PatientProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.NotFoundException;
 import com.medicore.repository.AppointmentRepository;
 import com.medicore.repository.DoctorProfileRepository;
+import com.medicore.repository.PatientProfileRepository;
 import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class AppointmentService {
 	private final AuthService authService;
 	private final UserRepository userRepo;
 	private final DoctorProfileRepository doctorProfileRepo;
+	private final PatientProfileRepository patientProfileRepo;
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
@@ -49,8 +52,21 @@ public class AppointmentService {
 	public ResponseEntity<ApiResponseDto> getByDoctor(){
 		User authUser = authService.getLoginUser();
 		List<Appointment> appointments = appointmentRepo.findAllByDoctor(authUser);
+		
+		Set<Long> patientIds = appointments.stream()
+				.map(appointment -> appointment.getPatient().getId())
+				.collect(Collectors.toSet());
+		Map<Long, PatientProfile> patientProfiles = patientProfileRepo.findAllByUser_IdIn(patientIds)
+				.stream().collect(Collectors.toMap(
+						profile -> profile.getUser().getId(), 
+						profile -> profile));
+		List<AppointmentResponseDto> responseDto = appointments.stream()
+				.map(appointment -> {
+					PatientProfile profile = patientProfiles.get(appointment.getPatient().getId());
+					return new AppointmentResponseDto(appointment, profile);
+				}).toList();
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponseDto(true,"doctor's appointments fetched", appointments));
+				.body(new ApiResponseDto(true,"doctor's appointments fetched", responseDto));
 	}
 
 
@@ -69,16 +85,9 @@ public class AppointmentService {
 		List<AppointmentResponseDto> responseDto = appointments.stream()
 				.map(appointment -> {
 					DoctorProfile profile = doctorProfiles.get(appointment.getDoctor().getId());
-					DoctorProfileResponseDto profileDto = new DoctorProfileResponseDto(profile);
-					return new AppointmentResponseDto(appointment, profileDto);
+					return new AppointmentResponseDto(appointment, profile);
 				}).toList();
 		
-//		List<AppointmentResponseDto> responseDto = new ArrayList<AppointmentResponseDto>();
-//		for(Appointment appointment:appointments) {
-//			DoctorProfileResponseDto doctorProfile = doctorProfileService.getUserProfile(appointment.getDoctor());
-//			AppointmentResponseDto response = new AppointmentResponseDto(appointment, doctorProfile);
-//			responseDto.add(response);
-//		}
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"patient's appointments fetched", responseDto));
 	}
