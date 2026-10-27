@@ -2,6 +2,9 @@ package com.medicore.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.NotFoundException;
 import com.medicore.repository.AppointmentRepository;
+import com.medicore.repository.DoctorProfileRepository;
 import com.medicore.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +35,7 @@ public class AppointmentService {
 	private final AppointmentRepository appointmentRepo;
 	private final AuthService authService;
 	private final UserRepository userRepo;
-	private final DoctorProfileService doctorProfileService;
+	private final DoctorProfileRepository doctorProfileRepo;
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
@@ -54,12 +58,27 @@ public class AppointmentService {
 	public ResponseEntity<ApiResponseDto> getByPatient(){
 		User authUser = authService.getLoginUser();
 		List<Appointment> appointments = appointmentRepo.findAllByPatient(authUser);
-		List<AppointmentResponseDto> responseDto = new ArrayList<AppointmentResponseDto>();
-		for(Appointment appointment:appointments) {
-			DoctorProfileResponseDto doctorProfile = doctorProfileService.getUserProfile(appointment.getDoctor());
-			AppointmentResponseDto response = new AppointmentResponseDto(appointment, doctorProfile);
-			responseDto.add(response);
-		}
+		
+		Set<Long> doctorIds = appointments.stream()
+				.map(appointment -> appointment.getDoctor().getId())
+				.collect(Collectors.toSet());
+		Map<Long, DoctorProfile> doctorProfiles = doctorProfileRepo.findAllByUser_IdIn(doctorIds)
+				.stream().collect(Collectors.toMap(
+						profile -> profile.getUser().getId(),
+						profile -> profile));
+		List<AppointmentResponseDto> responseDto = appointments.stream()
+				.map(appointment -> {
+					DoctorProfile profile = doctorProfiles.get(appointment.getDoctor().getId());
+					DoctorProfileResponseDto profileDto = new DoctorProfileResponseDto(profile);
+					return new AppointmentResponseDto(appointment, profileDto);
+				}).toList();
+		
+//		List<AppointmentResponseDto> responseDto = new ArrayList<AppointmentResponseDto>();
+//		for(Appointment appointment:appointments) {
+//			DoctorProfileResponseDto doctorProfile = doctorProfileService.getUserProfile(appointment.getDoctor());
+//			AppointmentResponseDto response = new AppointmentResponseDto(appointment, doctorProfile);
+//			responseDto.add(response);
+//		}
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"patient's appointments fetched", responseDto));
 	}

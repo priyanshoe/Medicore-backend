@@ -1,6 +1,10 @@
 package com.medicore.repository;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +16,7 @@ public interface DoctorProfileRepository extends JpaRepository<DoctorProfile, Lo
 	boolean existsByUser(User user);
 
 	Optional<DoctorProfile> findByUser(User user);
+
+	List<DoctorProfile> findAllByUser_IdIn(Collection<Long> userIds);
 
 }
