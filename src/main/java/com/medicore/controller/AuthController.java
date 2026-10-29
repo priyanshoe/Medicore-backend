@@ -30,7 +30,11 @@ public class AuthController {
 	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody PatientSignUpRequestDto signUpRequestDto) {
 		return authService.register(signUpRequestDto.getUser(), signUpRequestDto.getProfile());
 	}
-	
+
+	@PostMapping("/sign-up/admin")
+	public ResponseEntity<ApiResponseDto> SignUp(@RequestBody UserRequestDto newAdmin) {
+		return authService.register(newAdmin);
+	}
 
 	@PostMapping("/sign-in")
 	public ResponseEntity<ApiResponseDto> SignIn(@RequestBody UserRequestDto reqUser) {

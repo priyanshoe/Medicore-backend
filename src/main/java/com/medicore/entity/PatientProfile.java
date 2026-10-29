@@ -38,7 +38,6 @@ public class PatientProfile {
 	private String address;
 	
 	public PatientProfile(PatientProfileRequestDto profile) {
-		this.name = profile.getName();
 		this.phone = profile.getPhone();
 		this.dateOfBirth = profile.getDateOfBirth();
 		this.gender = profile.getGender();

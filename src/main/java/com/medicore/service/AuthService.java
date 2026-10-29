@@ -3,9 +3,12 @@ package com.medicore.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,6 +96,25 @@ public class AuthService {
 				.body(new ApiResponseDto(true,"patient registered", responseDto));
 	}
 	
+	//register admin
+
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<ApiResponseDto> register(UserRequestDto newUser) {
+		if(userRepo.existsByEmail(newUser.getEmail())) {
+			throw new ConflictException("user");
+		}
+		User user = new User(newUser);
+		user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+		User savedUser = userRepo.save(user);
+		
+		// convert to Dto
+		UserResponseDto userRes = new UserResponseDto(savedUser);
+		AuthResponseDto responseDto = new AuthResponseDto(userRes,null, null, jwtService.genrateToken(savedUser));
+		
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new ApiResponseDto(true,"admin registered", responseDto));
+	}
+	
 	
 	
 	
@@ -122,6 +144,14 @@ public class AuthService {
 			throw new RuntimeException(e.getMessage());
 		}
 				
+	}
+	
+	// only for backend
+	public User getLoginUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final String email = authentication.getName(); 
+		return userRepo.findByEmail(email)
+				.orElseThrow(() -> new UnAuthorizeException("user not logged in"));
 	}
 
 }

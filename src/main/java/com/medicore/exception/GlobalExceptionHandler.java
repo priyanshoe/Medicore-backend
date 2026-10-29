@@ -1,7 +1,10 @@
 package com.medicore.exception;
 
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +23,18 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponseDto> handleUnAuthorizeException(UnAuthorizeException ex) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 				.body(new ApiResponseDto(false,ex.getMessage(),null));
+	}
+	
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ApiResponseDto> handleAccessDenied(
+	        AccessDeniedException ex) {
+
+	    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	            .body(new ApiResponseDto(
+	                    false,
+	                    "You are not authorized to access this resource",
+	                    null
+	            ));
 	}
 	
 	@ExceptionHandler(BadRequestException.class)
@@ -41,4 +56,19 @@ public class GlobalExceptionHandler {
 				.body(new ApiResponseDto(false, ex.getMessage(), null));
 	}
 	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ApiResponseDto> handleNotFoundException(NotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ApiResponseDto(false, ex.getMessage(), null));
+	}
+	
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ApiResponseDto> handleDataIntegrityViolationExceptionException(DataIntegrityViolationException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(new ApiResponseDto(false, "appointment already exists", null));
+	}
+	
 }
+
+
