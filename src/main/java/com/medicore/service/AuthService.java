@@ -3,6 +3,7 @@ package com.medicore.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -93,6 +94,25 @@ public class AuthService {
 		
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ApiResponseDto(true,"patient registered", responseDto));
+	}
+	
+	//register admin
+
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<ApiResponseDto> register(UserRequestDto newUser) {
+		if(userRepo.existsByEmail(newUser.getEmail())) {
+			throw new ConflictException("user");
+		}
+		User user = new User(newUser);
+		user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+		User savedUser = userRepo.save(user);
+		
+		// convert to Dto
+		UserResponseDto userRes = new UserResponseDto(savedUser);
+		AuthResponseDto responseDto = new AuthResponseDto(userRes,null, null, jwtService.genrateToken(savedUser));
+		
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new ApiResponseDto(true,"admin registered", responseDto));
 	}
 	
 	

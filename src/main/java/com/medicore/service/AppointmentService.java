@@ -17,12 +17,14 @@ import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.AppointmentRequestDto;
 import com.medicore.dto.AppointmentResponseDto;
 import com.medicore.dto.DoctorProfileResponseDto;
+import com.medicore.dto.PatientProfileResponseDto;
 import com.medicore.entity.Appointment;
 import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.PatientProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.NotFoundException;
+import com.medicore.exception.UnAuthorizeException;
 import com.medicore.repository.AppointmentRepository;
 import com.medicore.repository.DoctorProfileRepository;
 import com.medicore.repository.PatientProfileRepository;
@@ -42,7 +44,14 @@ public class AppointmentService {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
-		List<Appointment> appointments = appointmentRepo.findAll();
+		List<AppointmentResponseDto> appointments = appointmentRepo.findAll()
+				.stream().map(appointment ->
+				new AppointmentResponseDto(appointment, 
+						doctorProfileRepo.findByUser(appointment.getDoctor())
+						.orElseThrow(()-> new NotFoundException("doctor")), 
+						patientProfileRepo.findByUser(appointment.getPatient())
+						.orElseThrow(()-> new NotFoundException("doctor"))
+						)).toList();
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"appointments fetched", appointments));
 	}
@@ -114,5 +123,39 @@ public class AppointmentService {
 		
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"appointment created", savedAppointment));
+	}
+	
+	
+	
+	public ResponseEntity<ApiResponseDto> updateStatus(Long id, AppointmentStatus status){
+		Appointment existingAppointment = appointmentRepo.findById(id)
+				.orElseThrow(()-> new NotFoundException("appointment with id: "+id));
+
+		User loggedinUser = authService.getLoginUser();
+		if(loggedinUser.getRole().equals(UserRole.DOCTOR)
+				&& !existingAppointment.getDoctor().equals(loggedinUser)) {
+			throw new UnAuthorizeException("appointment don'nt belongs to you");
+		}
+		
+		if(loggedinUser.getRole().equals(UserRole.PATIENT)) {
+			if(!existingAppointment.getPatient().equals(loggedinUser)) {
+				throw new UnAuthorizeException("appointment don'nt belongs to you");			
+			}
+			if( status.equals(AppointmentStatus.COMPLETED)
+				|| status.equals(AppointmentStatus.ACCEPTED)) {
+				throw new UnAuthorizeException("you are not authoraize to performe this action");
+			}
+		}
+		
+		
+		existingAppointment.setStatus(status);
+		Appointment updatedAppointment = appointmentRepo.save(existingAppointment);
+		DoctorProfile doctorProfile = doctorProfileRepo.findByUser(existingAppointment.getDoctor())
+				.orElseThrow(()-> new NotFoundException("doctor profile not found"));
+		PatientProfile patientProfile = patientProfileRepo.findByUser(existingAppointment.getPatient())
+				.orElseThrow(()-> new NotFoundException("doctor profile not found"));
+		AppointmentResponseDto response = new AppointmentResponseDto(updatedAppointment,doctorProfile, patientProfile);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(new ApiResponseDto(true,"appointment status updated", response));
 	}
 }
