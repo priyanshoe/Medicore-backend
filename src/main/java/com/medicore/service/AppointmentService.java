@@ -44,14 +44,6 @@ public class AppointmentService {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
-//		List<AppointmentResponseDto> appointments = appointmentRepo.findAll()
-//				.stream().map(appointment ->
-//				new AppointmentResponseDto(appointment, 
-//						doctorProfileRepo.findByUser(appointment.getDoctor())
-//						.orElseThrow(()-> new NotFoundException("doctor")), 
-//						patientProfileRepo.findByUser(appointment.getPatient())
-//						.orElseThrow(()-> new NotFoundException("doctor"))
-//						)).toList();
 		List<Appointment> appointments = appointmentRepo.findAll();
 		
 		// fetch doctor profiles
@@ -147,13 +139,15 @@ public class AppointmentService {
 		appointment.setStatus(AppointmentStatus.PENDING);
 		
 		Appointment savedAppointment = appointmentRepo.save(appointment);
-		
+		DoctorProfile profile = doctorProfileRepo.findByUser(doctor)
+				.orElseThrow(()-> new NotFoundException("doctor with id: "+doctor.getId()));
+		AppointmentResponseDto response = new AppointmentResponseDto(savedAppointment, profile);	
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponseDto(true,"appointment created", savedAppointment));
+				.body(new ApiResponseDto(true,"appointment created", response));
 	}
 	
 	
-	
+	@PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PATIENT')")
 	public ResponseEntity<ApiResponseDto> updateStatus(Long id, AppointmentStatus status){
 		Appointment existingAppointment = appointmentRepo.findById(id)
 				.orElseThrow(()-> new NotFoundException("appointment with id: "+id));
