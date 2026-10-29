@@ -44,16 +44,43 @@ public class AppointmentService {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponseDto> getAll(){
-		List<AppointmentResponseDto> appointments = appointmentRepo.findAll()
-				.stream().map(appointment ->
-				new AppointmentResponseDto(appointment, 
-						doctorProfileRepo.findByUser(appointment.getDoctor())
-						.orElseThrow(()-> new NotFoundException("doctor")), 
-						patientProfileRepo.findByUser(appointment.getPatient())
-						.orElseThrow(()-> new NotFoundException("doctor"))
-						)).toList();
+//		List<AppointmentResponseDto> appointments = appointmentRepo.findAll()
+//				.stream().map(appointment ->
+//				new AppointmentResponseDto(appointment, 
+//						doctorProfileRepo.findByUser(appointment.getDoctor())
+//						.orElseThrow(()-> new NotFoundException("doctor")), 
+//						patientProfileRepo.findByUser(appointment.getPatient())
+//						.orElseThrow(()-> new NotFoundException("doctor"))
+//						)).toList();
+		List<Appointment> appointments = appointmentRepo.findAll();
+		
+		// fetch doctor profiles
+		Set<Long> doctorIds = appointments.stream()
+				.map(appointment -> appointment.getDoctor().getId())
+				.collect(Collectors.toSet());
+		Map<Long, DoctorProfile> doctorProfiles = doctorProfileRepo.findAllByUser_IdIn(doctorIds)
+				.stream().collect(Collectors.toMap(
+						profile -> profile.getUser().getId(), 
+						profile -> profile));
+		
+		// fetch patient profiles
+		Set<Long> patientIds = appointments.stream()
+				.map(appointment -> appointment.getPatient().getId())
+				.collect(Collectors.toSet());
+		Map<Long, PatientProfile> patientProfiles = patientProfileRepo.findAllByUser_IdIn(patientIds)
+				.stream().collect(Collectors.toMap(
+						profile -> profile.getUser().getId(), 
+						profile -> profile));
+		List<AppointmentResponseDto> response = appointments.stream()
+				.map(appointment -> {
+				DoctorProfile docotorProfile = doctorProfiles.get(appointment.getDoctor().getId());
+				PatientProfile patientProfile = patientProfiles.get(appointment.getPatient().getId());
+				return new AppointmentResponseDto(appointment, docotorProfile, patientProfile);
+				})
+				.toList();
+		
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponseDto(true,"appointments fetched", appointments));
+				.body(new ApiResponseDto(true,"appointments fetched", response));
 	}
 	
 
