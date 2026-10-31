@@ -1,6 +1,5 @@
 package com.medicore.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +15,6 @@ import com.medicore.ENUM.UserRole;
 import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.AppointmentRequestDto;
 import com.medicore.dto.AppointmentResponseDto;
-import com.medicore.dto.DoctorProfileResponseDto;
-import com.medicore.dto.PatientProfileResponseDto;
 import com.medicore.entity.Appointment;
 import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.PatientProfile;
@@ -37,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class AppointmentService {
 
 	private final AppointmentRepository appointmentRepo;
-	private final AuthService authService;
+	private final CurrentUserService currentUserService;
 	private final UserRepository userRepo;
 	private final DoctorProfileRepository doctorProfileRepo;
 	private final PatientProfileRepository patientProfileRepo;
@@ -78,7 +75,7 @@ public class AppointmentService {
 
 	@PreAuthorize("hasRole('DOCTOR')")
 	public ResponseEntity<ApiResponseDto> getByDoctor(){
-		User authUser = authService.getLoginUser();
+		User authUser = currentUserService.getLoginUser();
 		List<Appointment> appointments = appointmentRepo.findAllByDoctor(authUser);
 		
 		Set<Long> patientIds = appointments.stream()
@@ -100,7 +97,7 @@ public class AppointmentService {
 
 	@PreAuthorize("hasRole('PATIENT')")
 	public ResponseEntity<ApiResponseDto> getByPatient(){
-		User authUser = authService.getLoginUser();
+		User authUser = currentUserService.getLoginUser();
 		List<Appointment> appointments = appointmentRepo.findAllByPatient(authUser);
 		
 		Set<Long> doctorIds = appointments.stream()
@@ -123,7 +120,7 @@ public class AppointmentService {
 
 	@PreAuthorize("hasRole('PATIENT')")
 	public ResponseEntity<ApiResponseDto> create(AppointmentRequestDto newAppointment){
-		User patient = authService.getLoginUser();
+		User patient = currentUserService.getLoginUser();
 		User doctor = userRepo.findById(newAppointment.getDoctorId())
 				.orElseThrow(()-> new NotFoundException("doctor"));
 		if(!doctor.getRole().equals(UserRole.DOCTOR)) {
@@ -152,7 +149,7 @@ public class AppointmentService {
 		Appointment existingAppointment = appointmentRepo.findById(id)
 				.orElseThrow(()-> new NotFoundException("appointment with id: "+id));
 
-		User loggedinUser = authService.getLoginUser();
+		User loggedinUser = currentUserService.getLoginUser();
 		if(loggedinUser.getRole().equals(UserRole.DOCTOR)
 				&& !existingAppointment.getDoctor().equals(loggedinUser)) {
 			throw new UnAuthorizeException("appointment don'nt belongs to you");

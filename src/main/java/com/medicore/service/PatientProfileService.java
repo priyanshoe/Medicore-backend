@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.medicore.dto.ApiResponseDto;
@@ -15,6 +16,7 @@ import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.ConflictException;
 import com.medicore.exception.NotFoundException;
+import com.medicore.exception.UnAuthorizeException;
 import com.medicore.repository.PatientProfileRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class PatientProfileService {
 
 	private final PatientProfileRepository profileRepo;
+	private final CurrentUserService currentUserService;
 
 	
 
@@ -41,6 +44,29 @@ public class PatientProfileService {
 		PatientProfileResponseDto response = new PatientProfileResponseDto(profile);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto(true, "patient profile fetched", response));
 	}
+	
+	
+
+	@PreAuthorize("hasRole('PATIENT')")
+	public ResponseEntity<ApiResponseDto> updateProfile(Long id, PatientProfileRequestDto reqProfile) {
+		PatientProfile existingProfile = profileRepo.findById(id)
+				.orElseThrow(()-> new NotFoundException("profile with id: "+id));
+		User authUser = currentUserService.getLoginUser();
+		if(!authUser.getId().equals(existingProfile.getUser().getId())) {
+			throw new UnAuthorizeException("profile don't belong's to you");
+		}
+		existingProfile.setName(reqProfile.getName());
+		existingProfile.getUser().setName(reqProfile.getName());
+		existingProfile.setPhone(reqProfile.getPhone());
+		existingProfile.setDateOfBirth(reqProfile.getDateOfBirth());
+		existingProfile.setGender(reqProfile.getGender());
+		existingProfile.setAddress(reqProfile.getAddress());
+		profileRepo.save(existingProfile);
+		
+		PatientProfileResponseDto response = new PatientProfileResponseDto(existingProfile);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto(true, "patient profile updated", response));
+	}
+	
 	
 	
 	

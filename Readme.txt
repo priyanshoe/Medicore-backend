@@ -1,7 +1,12 @@
 api prefix = "/api"
 
 PENDING
-fetch all doctor profiles for patients
-
+Profiles
+	Patient
+		update
+	Doctor
+		update
+		
 appointment entity
-	prescription entity
+
+prescription entity

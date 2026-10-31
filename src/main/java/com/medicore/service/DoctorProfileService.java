@@ -6,18 +6,18 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.DoctorProfileRequestDto;
 import com.medicore.dto.DoctorProfileResponseDto;
-import com.medicore.dto.PatientProfileResponseDto;
 import com.medicore.entity.DoctorProfile;
-import com.medicore.entity.PatientProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.ConflictException;
 import com.medicore.exception.NotFoundException;
+import com.medicore.exception.UnAuthorizeException;
 import com.medicore.repository.DoctorProfileRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class DoctorProfileService {
 	
 	private final DoctorProfileRepository profileRepo;
+	private final CurrentUserService currentUserService;
 	
 	public ResponseEntity<ApiResponseDto> getAllprofiles(){
 		List<DoctorProfile> doctorProfiles = profileRepo.findAll();
@@ -47,6 +48,30 @@ public class DoctorProfileService {
 		DoctorProfile profile = profileRepo.findById(id).orElseThrow(()-> new NotFoundException("profile with id: "+id));
 		DoctorProfileResponseDto response = new DoctorProfileResponseDto(profile);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto(true, "doctor profile fetched", response));
+	}
+	
+
+	@PreAuthorize("hasRole('DOCTOR')")
+	public ResponseEntity<ApiResponseDto> updateProfile(Long id, DoctorProfileRequestDto reqProfile) {
+		DoctorProfile existingProfile = profileRepo.findById(id)
+				.orElseThrow(()-> new NotFoundException("profile with id: "+id));
+		User authUser = currentUserService.getLoginUser();
+		if(!authUser.getId().equals(existingProfile.getUser().getId())) {
+			throw new UnAuthorizeException("profile don't belong's to you");
+		}
+		existingProfile.setName(reqProfile.getName());
+		existingProfile.getUser().setName(reqProfile.getName());
+		existingProfile.setPhone(reqProfile.getPhone());
+		existingProfile.setSpecialization(reqProfile.getSpecialization());
+		existingProfile.setQualification(reqProfile.getQualification());
+		existingProfile.setExperience(reqProfile.getExperience());
+		existingProfile.setConsultationFee(reqProfile.getConsultationFee());
+		existingProfile.setProfileImage(reqProfile.getProfileImage());
+		existingProfile.setAvailability(reqProfile.getAvailability());
+		profileRepo.save(existingProfile);
+		
+		DoctorProfileResponseDto response = new DoctorProfileResponseDto(existingProfile);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto(true, "doctor profile updated", response));
 	}
 	
 		

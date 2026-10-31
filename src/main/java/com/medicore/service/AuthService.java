@@ -146,12 +146,5 @@ public class AuthService {
 				
 	}
 	
-	// only for backend
-	public User getLoginUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		final String email = authentication.getName(); 
-		return userRepo.findByEmail(email)
-				.orElseThrow(() -> new UnAuthorizeException("user not logged in"));
-	}
 
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class PatientProfileRequestDto {
 
+	private String name;
 	private String phone;
 	private Date dateOfBirth;
 	private Gender gender;

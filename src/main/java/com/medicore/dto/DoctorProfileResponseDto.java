@@ -8,7 +8,7 @@ import lombok.Data;
 public class DoctorProfileResponseDto {
 
 	private Long id;
-	private Long UserId;
+	private Long userId;
 	private String name;
 	private String phone;
 	private String specialization;
@@ -21,7 +21,7 @@ public class DoctorProfileResponseDto {
 	// convert profile -> DoctorProfileResponseDto
 	public DoctorProfileResponseDto(DoctorProfile profile){
 		this.id = profile.getId();
-		this.UserId = profile.getUser().getId();
+		this.userId = profile.getUser().getId();
 		this.name = profile.getName();
 		this.phone = profile.getPhone();
 		this.specialization = profile.getSpecialization();
