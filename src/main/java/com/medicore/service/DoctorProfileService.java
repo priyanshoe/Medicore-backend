@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.medicore.dto.ApiResponseDto;
 import com.medicore.dto.DoctorProfileRequestDto;
 import com.medicore.dto.DoctorProfileResponseDto;
+import com.medicore.dto.PatientProfileResponseDto;
 import com.medicore.entity.DoctorProfile;
+import com.medicore.entity.PatientProfile;
 import com.medicore.entity.User;
 import com.medicore.exception.BadRequestException;
 import com.medicore.exception.ConflictException;
@@ -39,6 +41,14 @@ public class DoctorProfileService {
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponseDto(true,"doctor profiles fetched", responseDtos));
 	}
+	
+
+	public ResponseEntity<ApiResponseDto> getUserProfileById(Long id) {
+		DoctorProfile profile = profileRepo.findById(id).orElseThrow(()-> new NotFoundException("profile with id: "+id));
+		DoctorProfileResponseDto response = new DoctorProfileResponseDto(profile);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto(true, "doctor profile fetched", response));
+	}
+	
 		
 	// only for backEnd
 	public DoctorProfileResponseDto registerProfile(User user, DoctorProfileRequestDto profile){
