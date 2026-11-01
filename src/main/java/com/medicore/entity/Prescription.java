@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.medicore.dto.PrescriptionRequestDto;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -26,6 +27,13 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Prescription {
 
+	public Prescription(PrescriptionRequestDto prescription) {
+
+		this.instructions = prescription.getInstructions();
+		this.notes = prescription.getNotes();
+		this.followUpDate = prescription.getFollowUpDate();
+		this.medicines = prescription.getMedicines();
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
