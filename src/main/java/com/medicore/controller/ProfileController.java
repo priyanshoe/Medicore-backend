@@ -58,6 +58,11 @@ public class ProfileController {
 		return patientProfileService.getUserProfileById(id);
 	}
 	
+	@GetMapping("/patient/doctor")
+	public ResponseEntity<ApiResponseDto> getPatientByDoctor(){
+		return patientProfileService.getProfilesByDoctor();
+	}
+	
 	@PutMapping("/patient/{id}")
 	public ResponseEntity<ApiResponseDto> updatePatientProfile(@PathVariable Long id, @RequestBody PatientProfileRequestDto reqProfile){
 		return patientProfileService.updateProfile(id, reqProfile);
