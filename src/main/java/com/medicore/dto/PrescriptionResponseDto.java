@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.Medicine;
 import com.medicore.entity.Prescription;
@@ -12,6 +13,7 @@ import com.medicore.entity.Prescription;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrescriptionResponseDto {
 
 	private Long id;
@@ -33,7 +35,9 @@ public class PrescriptionResponseDto {
 		this.patient.put("id", prescription.getPatient().getId().toString());
 		this.patient.put("name", prescription.getPatient().getName());
 		
-		this.appointmentId = prescription.getAppointment().getId();
+		if(prescription.getAppointment() != null) {
+			this.appointmentId = prescription.getAppointment().getId();
+		}
 		this.medicines = prescription.getMedicines();
 		this.diagnosis = prescription.getDiagnosis();
 		this.instructions = prescription.getInstructions();
@@ -52,7 +56,9 @@ public class PrescriptionResponseDto {
 		this.patient.put("id", prescription.getPatient().getId().toString());
 		this.patient.put("name", prescription.getPatient().getName());
 		
-		this.appointmentId = prescription.getAppointment().getId();
+		if(prescription.getAppointment() != null) {
+			this.appointmentId = prescription.getAppointment().getId();
+		}
 		this.medicines = prescription.getMedicines();
 		this.diagnosis = prescription.getDiagnosis();
 		this.instructions = prescription.getInstructions();

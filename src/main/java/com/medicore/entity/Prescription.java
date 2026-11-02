@@ -47,9 +47,9 @@ public class Prescription {
 	@JoinColumn(name = "patient_id", nullable = false)
 	@JsonIgnore
 	private User patient;
-	
-	@OneToOne
-	@JoinColumn(name = "appointment_id", nullable = false)
+
+	@OneToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "appointment_id", nullable = true)
 	@JsonIgnore
 	private Appointment appointment;
 	

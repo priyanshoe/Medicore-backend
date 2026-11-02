@@ -91,25 +91,29 @@ public class PrescriptionService {
 		User doctor = currentUserService.getLoginUser();
 		User patient = userRepo.findById(newPrescription.getPatientId())
 				.orElseThrow(()-> new NotFoundException("patient with id: "+newPrescription.getPatientId()));
-		Appointment appointment = appointmentRepo.findById(newPrescription.getAppointmentId())
-				.orElseThrow(()-> new NotFoundException("appointment with id: "+newPrescription.getAppointmentId()));
-		if(prescriptionRepo.existsByAppointment(appointment)) {
-			throw new ConflictException("prescription for this appointment");			
-		}
 		if(!doctor.getRole().equals(UserRole.DOCTOR)) {
 			throw new UnAuthorizeException();
-		}
-		if(!appointment.getDoctor().equals(doctor)) {
-			throw new UnAuthorizeException("appointment dosn't belogs to you");
-		}
-		if(!appointment.getPatient().equals(patient)) {
-			throw new UnAuthorizeException("appointment dosn't belogs to this patient");
 		}
 		
 		Prescription prescription = new Prescription(newPrescription);
 		prescription.setDoctor(doctor);
 		prescription.setPatient(patient);
-		prescription.setAppointment(appointment);
+		
+		if(newPrescription.getAppointmentId() != null) {
+			Appointment appointment = appointmentRepo.findById(newPrescription.getAppointmentId())
+					.orElseThrow(()-> new NotFoundException("appointment with id: "+newPrescription.getAppointmentId()));
+			if(prescriptionRepo.existsByAppointment(appointment)) {
+				throw new ConflictException("prescription for this appointment");			
+			}
+			if(!appointment.getDoctor().equals(doctor)) {
+				throw new UnAuthorizeException("appointment dosn't belogs to you");
+			}
+			if(!appointment.getPatient().equals(patient)) {
+				throw new UnAuthorizeException("appointment dosn't belogs to this patient");
+			}
+			prescription.setAppointment(appointment);
+			
+		}
 		
 		List<Medicine> medicines = new ArrayList<Medicine>();
 		for(Medicine med:newPrescription.getMedicines()) {
