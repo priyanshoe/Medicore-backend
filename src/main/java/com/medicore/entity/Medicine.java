@@ -20,6 +20,18 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Medicine {
 
+	public Medicine(Medicine med, Prescription prescription) {
+		this.name = med.getName();
+		this.dosage = med.getDosage();
+		this.frequency = med.getFrequency();
+		this.prescription = prescription;
+	}
+	public Medicine(Medicine med) {
+		this.name = med.getName();
+		this.dosage = med.getDosage();
+		this.frequency = med.getFrequency();
+		this.prescription = med.getPrescription();
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

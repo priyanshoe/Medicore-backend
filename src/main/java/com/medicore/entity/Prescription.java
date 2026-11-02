@@ -29,10 +29,10 @@ public class Prescription {
 
 	public Prescription(PrescriptionRequestDto prescription) {
 
+		this.diagnosis = prescription.getDiagnosis();
 		this.instructions = prescription.getInstructions();
 		this.notes = prescription.getNotes();
 		this.followUpDate = prescription.getFollowUpDate();
-		this.medicines = prescription.getMedicines();
 	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +60,7 @@ public class Prescription {
 	private List<Medicine> medicines = new ArrayList<Medicine>();
 	
 	private String instructions;
+	private String diagnosis;
 	private String notes;
 	private Date followUpDate;
 	

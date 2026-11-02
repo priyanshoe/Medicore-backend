@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.medicore.entity.DoctorProfile;
 import com.medicore.entity.Medicine;
 import com.medicore.entity.Prescription;
 
@@ -18,6 +19,7 @@ public class PrescriptionResponseDto {
 	private HashMap<String, String> patient = new HashMap<String, String>();
 	private Long appointmentId;
 	private List<Medicine> medicines = new ArrayList<Medicine>();
+	private String diagnosis;
 	private String instructions;
 	private String notes;
 	private Date followUpDate;
@@ -33,6 +35,26 @@ public class PrescriptionResponseDto {
 		
 		this.appointmentId = prescription.getAppointment().getId();
 		this.medicines = prescription.getMedicines();
+		this.diagnosis = prescription.getDiagnosis();
+		this.instructions = prescription.getInstructions();
+		this.followUpDate = prescription.getFollowUpDate();
+	}
+	
+	public PrescriptionResponseDto(Prescription prescription, DoctorProfile doctor) {
+		this.id = prescription.getId();
+		
+		this.doctor.put("id", prescription.getDoctor().getId().toString());
+		this.doctor.put("name", doctor.getName());
+		this.doctor.put("profileImage", doctor.getProfileImage());
+		this.doctor.put("specialization", doctor.getSpecialization());
+		
+
+		this.patient.put("id", prescription.getPatient().getId().toString());
+		this.patient.put("name", prescription.getPatient().getName());
+		
+		this.appointmentId = prescription.getAppointment().getId();
+		this.medicines = prescription.getMedicines();
+		this.diagnosis = prescription.getDiagnosis();
 		this.instructions = prescription.getInstructions();
 		this.followUpDate = prescription.getFollowUpDate();
 	}

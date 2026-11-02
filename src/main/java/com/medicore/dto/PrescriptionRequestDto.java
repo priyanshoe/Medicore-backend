@@ -14,6 +14,7 @@ public class PrescriptionRequestDto {
 	private Long patientId;
 	private Long appointmentId;
 	private List<Medicine> medicines = new ArrayList<Medicine>();
+	private String diagnosis;
 	private String instructions;
 	private String notes;
 	private Date followUpDate;
