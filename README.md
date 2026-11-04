@@ -68,6 +68,15 @@ The application implements JWT-based authentication, role-based authorization, a
 | Postman | API testing |
 | Git & GitHub | Version control |
 
+
+## 🔗 Related Projects & Live Demo
+
+This backend is part of a full-stack Medicare application built using React.js and Spring Boot.
+
+- **Frontend Repository:** <a href="https://github.com/priyanshoe/MediCore" target="_blank" rel="noopener noreferrer">MediCare</a>
+- **Live Application:** <a href="https://medi-core-vert.vercel.app/" target="_blank" rel="noopener noreferrer">MediCare – Live Demo</a>
+
+
 ## 🏗️ Project Architecture
 
 The backend follows a layered architecture to maintain clean code organization and separation of responsibilities.
