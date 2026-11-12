@@ -63,7 +63,7 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		
 		config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5173", 
-				"https://medi-core-git-backendintegration-priyanshoes-projects.vercel.app"));
+				"https://medi-core-git-main-priyanshoes-projects.vercel.app"));
 		config.setAllowedMethods(List.of("GET","POST","PATCH","PUT","DELETE","OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
 		
